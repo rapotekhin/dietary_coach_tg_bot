@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -9,10 +10,26 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
+from alembic import command
+from alembic.config import Config as AlembicConfig
 
 from app.config import load_config
 from app.db.session import init_engine
 from app.handlers import common, measurements, meal, meal_time, report, start
+
+
+ROOT = Path(__file__).resolve().parent
+
+
+def _run_migrations(database_url: str) -> None:
+    """Прогоняет alembic upgrade head программно при старте.
+    Идемпотентно: если схема уже на head, alembic ничего не делает."""
+    cfg = AlembicConfig(str(ROOT / "alembic.ini"))
+    cfg.set_main_option("script_location", str(ROOT / "migrations"))
+    # alembic env.py использует синхронный URL; конвертируем aiosqlite → sqlite
+    sync_url = database_url.replace("+aiosqlite", "")
+    cfg.set_main_option("sqlalchemy.url", sync_url)
+    command.upgrade(cfg, "head")
 
 
 async def _set_bot_commands(bot: Bot) -> None:
@@ -31,6 +48,9 @@ async def main() -> None:
         level=cfg.log_level,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
+
+    _run_migrations(cfg.database_url)
+    logging.info("Миграции применены, схема БД актуальна.")
 
     init_engine(cfg.database_url)
 

@@ -10,10 +10,41 @@
 - pytz (часовые пояса)
 
 # Запуск
+
+## Локально
 ```bash
-python main.py
+python -m venv venv
+source venv/bin/activate          # Linux/macOS
+# .\venv\Scripts\Activate.ps1     # Windows PowerShell
+pip install -r requirements.txt
+cp .env.example .env              # вписать BOT_TOKEN
+python main.py                    # схема БД применится автоматически при старте
 ```
-Переменные грузятся из `.env` (см. `.env.example`).
+
+Переменные грузятся из `.env` (см. `.env.example`). Если `api.telegram.org` недоступен напрямую — задай `PROXY_URL` в `.env` (или экспортируй `HTTPS_PROXY` / `HTTP_PROXY` в shell — оно подхватится).
+
+## В Docker
+
+```bash
+cp .env.example .env              # вписать только BOT_TOKEN (DATABASE_URL не нужен)
+mkdir -p data exports reports     # SQLite и выгрузки будут жить тут на хосте
+
+docker compose up -d --build      # сборка + старт
+docker compose logs -f bot        # логи
+docker compose down               # остановить
+```
+
+Что монтируется:
+- `./data` → `/app/data` — SQLite-файл (`dietary_coach.db`). Переживает пересборку образа.
+- `./exports` → `/app/exports` — выгрузки `scripts/export_csv.py`.
+- `./reports` → `/app/reports` — PDF-отчёты, если будешь генерить их в контейнере.
+
+Прокси и `BOT_TOKEN` пробрасываются в контейнер автоматически: `HTTP_PROXY` / `HTTPS_PROXY` берутся из shell-окружения хоста (например, из `~/.bashrc`), `BOT_TOKEN` — из `.env`. Миграции прогоняются программно при старте бота (`main.py` сам вызывает `alembic upgrade head`).
+
+Запустить разовую команду в контейнере (например, экспорт CSV):
+```bash
+docker compose run --rm bot python scripts/export_csv.py --out /app/exports
+```
 
 # Проблема
 Нужен персональный коуч для ведения дневника питания и сохранения замеров с возможностью вывода статистики. Цель — держать правильное питание, питаться в нужные интервалы времени, не делать перекусов. Нужен трекер, в который удобно отправлять приёмы пищи, голод и насыщение.

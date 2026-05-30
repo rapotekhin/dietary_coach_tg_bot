@@ -1,0 +1,21 @@
+services:
+  bot:
+    build: .
+    container_name: dietary_coach_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Принудительно указываем путь к БД внутри контейнера — перекрывает значение из .env.
+      DATABASE_URL: sqlite+aiosqlite:////app/data/dietary_coach.db
+      ALEMBIC_DATABASE_URL: sqlite:////app/data/dietary_coach.db
+      # Прокси для api.telegram.org — берётся из окружения хоста (если в .bashrc).
+      # Чтобы переопределить — задай PROXY_URL в .env.
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1}
+    volumes:
+      # БД и экспорты лежат на хосте — переживают пересборку образа
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./reports:/app/reports
