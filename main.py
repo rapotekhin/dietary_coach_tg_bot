@@ -5,6 +5,7 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
@@ -33,7 +34,14 @@ async def main() -> None:
 
     init_engine(cfg.database_url)
 
-    bot = Bot(token=cfg.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    session = AiohttpSession(proxy=cfg.proxy_url) if cfg.proxy_url else AiohttpSession()
+    if cfg.proxy_url:
+        logging.info("Используется прокси: %s", cfg.proxy_url)
+    bot = Bot(
+        token=cfg.bot_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        session=session,
+    )
     dp = Dispatcher(storage=MemoryStorage())
 
     # порядок важен: FSM-хендлеры старта/замеров/отчёта/времени должны идти до meal-роутера
