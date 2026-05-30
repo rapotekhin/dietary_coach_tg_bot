@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/Code/dietary_coach_tg_bot/venv/Scripts/python.exe -m alembic upgrade head)",
+      "Bash(./venv/Scripts/python.exe scripts/export_csv.py)",
+      "Bash(./venv/Scripts/python.exe -m pip install seaborn==0.13.2)",
+      "Bash(./venv/Scripts/python.exe -c \"import pypdfium2; print\\('pypdfium2 available'\\)\")",
+      "Bash(./venv/Scripts/python.exe -m pip install pypdfium2)",
+      "Bash(./venv/Scripts/python.exe scripts/generate_test_report.py --out reports/sample_report.pdf)",
+      "Bash(./venv/Scripts/python.exe -c ' *)"
+    ]
+  }
+}

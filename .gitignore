@@ -1,0 +1,17 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+*.db
+*.db-journal
+.pytest_cache/
+.mypy_cache/
+.idea/
+.vscode/
+*.log
+exports/
+reports/

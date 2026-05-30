@@ -1,0 +1,11 @@
+aiogram==3.13.1
+SQLAlchemy[asyncio]==2.0.36
+aiosqlite==0.20.0
+alembic==1.13.3
+python-dotenv==1.0.1
+pytz==2024.2
+reportlab==4.2.5
+matplotlib==3.9.2
+seaborn==0.13.2
+Pillow==11.0.0
+aiogram-calendar==0.5.0
